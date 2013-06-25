@@ -1,0 +1,24 @@
+{
+  "name": "herswebserver",
+  "main": "index.js",
+  "version": "0.1.0",
+  "description": "H.E.R.S. server extension enabling the server to expose JS communication code to the Web page - analogous to socket.io mechanism",
+  "dependencies": {
+    "connect": ">= 2.7.8"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hers-belgrade/herswebserver.git"
+  },
+  "keywords": [
+    "hers",
+    "server",
+    "nodejs"
+  ],
+  "author": "Andrija Petrovic",
+  "license": "BSD",
+  "readmeFilename": "README.md"
+}
