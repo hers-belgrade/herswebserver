@@ -2,7 +2,7 @@ var LPB = require('herslongpoll').LongPollBuffer;
 
 var session_groups = {}
 
-function Buffer(group) {
+function Buffer(group,sid) {
 	var self = this;
 	LPB.apply(this, [function () {
 		return group.root.stringify();
@@ -17,8 +17,9 @@ function Buffer(group) {
 				values.push({ action : el.action, path: el.path, value: (el.target)?el.target.value(self.key):undefined});
 			}
 		}
+		console.log('going out? ',sid, JSON.stringify(values));
 		update.batch = values;
-		self.send(transaction);
+		self.send(update);
 	});
 }
 
@@ -31,11 +32,11 @@ function get_buffer(obj, cb) {
 	var sid = obj.sid;
 
 	if (!session_groups[g.name]) session_groups[g.name] = {};
-	if (session_groups[g.name][sid]) return session_groups[g.name][sid];
+	if (session_groups[g.name][sid]) return cb(sid, session_groups[g.name][sid]);
 	//obviously, it's wrong sid, create him another one ...
 
 	g.new_sid_provider(function (sid) {
-		var lpb = new Buffer(g);
+		var lpb = new Buffer(g,sid);
 		session_groups[g.name][sid] = lpb;
 		cb(sid, lpb);
 	});

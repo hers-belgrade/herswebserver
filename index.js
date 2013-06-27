@@ -73,7 +73,7 @@ WebServer.prototype.start = function (root, port) {
 		}
 
 		if (req.method != 'GET' && req.method != 'POST') return report_error(503);
-		var data = ((req.method == 'GET') ? res.query : res.body) || {};
+		var data = ((req.method == 'GET') ? req.query : req.body) || {};
 		Buffer.get_buffer ( {
 			group: self.find_group(group),
 			sid : data['hers_session']
