@@ -5,7 +5,7 @@ var session_groups = {}
 function Buffer(group,sid) {
 	var self = this;
 	LPB.apply(this, [function () {
-		return group.root.stringify();
+		return group.root.value();
 	}]);
 
 	this.hook_id = group.root.onNewTransaction.attach (function (update_elements) {
