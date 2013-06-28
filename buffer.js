@@ -14,7 +14,12 @@ function Buffer(group,sid) {
 		if (update_elements.batch) {
 			for (var i in update_elements.batch) {
 				var el = update_elements.batch[i];
-				values.push({ action : el.action, path: el.path, value: (el.target)?el.target.value(self.key):undefined});
+				values.push({ 
+					action : el.action, 
+					path: el.path, 
+					value: (el.target.target)?el.target.target.value(self.key):undefined,
+					name: el.target.name
+				});
 			}
 		}
 		console.log('going out? ',sid, JSON.stringify(values));

@@ -55,43 +55,59 @@ WebServer.prototype.start = function (root, port) {
 		if (url.indexOf('?') > -1) {
 			url = url.substring(0, url.indexOf('?'));
 		}
-
-		function report_error (code) {
-			res.writeHead(code, {'Content-Type':'text/plain'});
-			res.end();
-		}
 		url = replace_trailing_slashes(url);
 		var bread_crumbs = url.split('/');
 		var fname = bread_crumbs.pop();
 		var group = bread_crumbs.join ('/');
-		var f = self.func_for_group(group, fname);
-		if (!f) return report_error(503);
-
-
-		function go(data) {
-			var body = self.maps[group]['af'][fname](res, data||{});
-		}
 
 		if (req.method != 'GET' && req.method != 'POST') return report_error(503);
 		var data = ((req.method == 'GET') ? req.query : req.body) || {};
+
 		Buffer.get_buffer ( {
 			group: self.find_group(group),
 			sid : data['hers_session']
 		}, function (sid, lpbuffer){
 			/// execute functionality
-			var ret = f(data, function (key,mess) { lpbuffer.send({error:{key:key, message:mess}}); });
-			lpbuffer.check (function (update) {
-				var body = JSON.stringify({
-					'sid' : sid,
-					'update':update
-				});
+			var body = undefined;
+			/// if fname is noop use it for hooking ... else, return ret which will be passed on
+			if (fname == 'noop') {
+				console.log('got noop, should check on buffer ....');
+				lpbuffer.check (function (update) {
+					var body = JSON.stringify({
+						'sid' : sid,
+						'update':update
+					});
+					res.writeHead(200, {
+						'Content-Type':'application/json',
+						'Content-Length':body.length,
+					});
+					res.write(body);
+					res.end();
+				}, data['last_update']);
+			}else{
+				function report_error (code) {
+					res.writeHead(code, {'Content-Type':'text/plain'});
+					res.end();
+				}
+
+				var f = self.func_for_group(group, fname);
+				if (!f) return report_error(503);
+
+				var ret = f(data, function (key,mess) { lpbuffer.send({error:{key:key, message:mess}}); });
+				var tor = typeof(ret);
+				if ('undefined' == tor) {
+					ret = '';
+				}else if ('string' != tor) {
+					ret = JSON.stringify(ret);
+				}
+
 				res.writeHead(200, {
-					'Content-Type':'application/json',
-					'Content-Length':body.length,
+					'Connect-Type': 'application/json',
+					'Connect-Length': ret.length,
 				});
-				res.write(body);
+				res.write(ret);
 				res.end();
-			}, data['last_update']);
+			}
 		});
 	};
 	Connect.createServer (
