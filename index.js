@@ -51,12 +51,21 @@ WebServer.prototype.start = function (root, port) {
 
 	var map_resolver = function (req, res, next) {
 		var url = req.url;
+		function report_error (code) {
+			res.writeHead(code, {'Content-Type':'text/plain'});
+			res.end();
+		}
+
 		if (url.indexOf('.') > -1) { next(); return; }
 		if (url.indexOf('?') > -1) {
 			url = url.substring(0, url.indexOf('?'));
 		}
 		url = replace_trailing_slashes(url);
 		var bread_crumbs = url.split('/');
+		if (bread_crumbs.length < 2) {
+			report_error(503);
+			return;
+		}
 		var fname = bread_crumbs.pop();
 		var group = bread_crumbs.join ('/');
 
@@ -85,11 +94,7 @@ WebServer.prototype.start = function (root, port) {
 					res.end();
 				}, data['last_update']);
 			}else{
-				function report_error (code) {
-					res.writeHead(code, {'Content-Type':'text/plain'});
-					res.end();
-				}
-
+		
 				var f = self.func_for_group(group, fname);
 				if (!f) return report_error(503);
 
