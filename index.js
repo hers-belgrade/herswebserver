@@ -81,6 +81,7 @@ WebServer.prototype.start = function (root, port) {
 			/// if fname is noop use it for hooking ... else, return ret which will be passed on
 			if (fname == 'noop') {
 				console.log('got noop, should check on buffer ....');
+				res.connection.setTimeout(0); ///PROVERI DA LI CE OVO RESITI PROBLEM TIMEOUT-a ?
 				lpbuffer.check (function (update) {
 					var body = JSON.stringify({
 						'sid' : sid,

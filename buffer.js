@@ -17,8 +17,8 @@ function Buffer(group,sid) {
 				values.push({ 
 					action : el.action, 
 					path: el.path, 
-					value: (el.target.target)?el.target.target.value(self.key):undefined,
-					name: el.target.name
+					value: (el.target)?el.target.value(self.key):undefined,
+					name: el.name
 				});
 			}
 		}
