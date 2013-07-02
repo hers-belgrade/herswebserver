@@ -2,11 +2,15 @@ var LPB = require('herslongpoll').LongPollBuffer;
 
 var session_groups = {}
 
-function Buffer(group,sid) {
+function Buffer(group,sid, dump_method, key) {
 	var self = this;
 	LPB.apply(this, [function () {
 		return group.root.value();
 	}]);
+
+	if (['value','dump'].indexOf(dump_method) < 0) {
+		dump_method = 'value';
+	}
 
 	this.hook_id = group.root.onNewTransaction.attach (function (update_elements) {
 		var update = {alias:update_elements.alias};
@@ -17,7 +21,7 @@ function Buffer(group,sid) {
 				values.push({ 
 					action : el.action, 
 					path: el.path, 
-					value: (el.target)?el.target.value(self.key):undefined,
+					value: (dump_method == 'value') ? ((el.target)?el.target.value(key):undefined) : (((el.target)?el.target.dump():undefined)),
 					name: el.name
 				});
 			}
@@ -40,8 +44,8 @@ function get_buffer(obj, cb) {
 	if (session_groups[g.name][sid]) return cb(sid, session_groups[g.name][sid]);
 	//obviously, it's wrong sid, create him another one ...
 
-	g.new_sid_provider(function (sid) {
-		var lpb = new Buffer(g,sid);
+	g.new_sid_provider(function (sid,dump_method, key) {
+		var lpb = new Buffer(g,sid, dump_method, key);
 		session_groups[g.name][sid] = lpb;
 		cb(sid, lpb);
 	});
