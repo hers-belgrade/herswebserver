@@ -114,8 +114,11 @@ WebServer.prototype.start = function (port) {
 			res.writeHead(503,{'Content-Type':'text/plain'});
 			res.end();
 		}
-		function report_end (code) {
-			res.writeHead(code, {'Content-Type':'text/plain'});
+		function report_end (code, s) {
+			var header = {'Content-Type':'text/plain'};
+			if (s) header['Content-Length']= s.length;
+			res.writeHead(code,header);
+			res.write(s);
 			res.end();
 		}
 
@@ -129,6 +132,7 @@ WebServer.prototype.start = function (port) {
 		if (req.method != 'GET' && req.method != 'POST') return report_end(503);
 		var data = ((req.method == 'GET') ? req.query : req.body) || {};
 		var fname = bread_crumbs.shift();
+		console.log('PARAMS : ', req.method, data, fname);
 
 		if (fname === 'init' || fname === 'set_sid_provider') {
 			var err = self[fname](data);
@@ -136,7 +140,7 @@ WebServer.prototype.start = function (port) {
 				res.write(err);
 				return report_end(503);
 			}
-			return report_end(200);
+			return report_end(200,JSON.stringify({'status':'ok'}));
 		}
 
 		if ('function' !== typeof(SID_PROVIDER)) {
