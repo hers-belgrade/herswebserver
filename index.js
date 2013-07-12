@@ -41,11 +41,13 @@ WebServer.prototype.start = function (port) {
 	var map_resolver = function (req, res, next) {
 		var url = req.url;
 		function report_error (s) {
+      if(!res.writable){return;}
 			self.error_log(s);
 			res.writeHead(503,{'Content-Type':'text/plain'});
 			res.end();
 		}
 		function report_end (code, s) {
+      if(!res.writable){return;}
 			var header = {'Content-Type':'text/plain'};
 			if (s) header['Content-Length']= s.length;
 			res.writeHead(code,header);
