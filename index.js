@@ -18,17 +18,6 @@ WebServer.prototype.init = function (data) {
 	}
 }
 
-WebServer.prototype.set_sid_provider = function (data) {
-	try {
-		var module_name = data.module_name;
-		var req = require(module_name);
-		return undefined;
-	}catch (e) {
-		console.error(e.toString());
-		return e.toString();
-	}
-}
-
 WebServer.prototype.error_log = function (s) {
 	console.error(s);
 }
@@ -79,8 +68,12 @@ WebServer.prototype.start = function (port) {
       self.master.attach(fname,conf,key);
 			return report_end(200,JSON.stringify({'status':'ok'}));
 		}
+    if(typeof data.roles === 'string'){
+      data.roles = data.roles.split(',');
+    }
     if (!urlpath.length){
-      self.master.interact(data,'',dump);
+      console.log('noop?',data);
+      return self.master.interact(data,'',dump);
     }
 
     var paramobj;
@@ -90,9 +83,6 @@ WebServer.prototype.start = function (port) {
       }
       catch(e){}
       delete data.paramobj;
-    }
-    if(typeof data.roles === 'string'){
-      data.roles = data.roles.split(',');
     }
     console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
     setTimeout(function(){self.master.interact(data,urlpath,paramobj);},0);
