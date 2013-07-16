@@ -63,8 +63,15 @@ WebServer.prototype.start = function (port) {
       delete data.name;
       var key = data.key;
       delete data.key;
-      var conf = data.config;
-      delete data.config;
+      var conf;
+      if(typeof data.config !== 'undefined'){
+        try{
+          conf = JSON.parse(data.config);
+          console.log('initing with conf',conf);
+        }
+        catch(e){}
+        delete data.config;
+      }
       self.master.attach(fname,conf,key);
 			return report_end(200,JSON.stringify({'status':'ok'}));
 		}
@@ -72,7 +79,6 @@ WebServer.prototype.start = function (port) {
       data.roles = data.roles.split(',');
     }
     if (!urlpath.length){
-      console.log('noop?',data);
       return self.master.interact(data,'',dump);
     }
 
