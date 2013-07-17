@@ -63,6 +63,8 @@ WebServer.prototype.start = function (port) {
       delete data.name;
       var key = data.key;
       delete data.key;
+      var environmentmodulename = data.environment;
+      delete data.environment;
       var conf;
       if(typeof data.config !== 'undefined'){
         try{
@@ -72,7 +74,12 @@ WebServer.prototype.start = function (port) {
         catch(e){}
         delete data.config;
       }
-      self.master.attach(fname,conf,key);
+      try{
+        self.master.attach(fname,conf,key,environmentmodulename);
+      }
+      catch(e){
+        return report_error(e);
+      }
 			return report_end(200,JSON.stringify({'status':'ok'}));
 		}
     if(typeof data.roles === 'string'){
