@@ -86,7 +86,12 @@ WebServer.prototype.start = function (port) {
       data.roles = data.roles.split(',');
     }
     if (!urlpath.length){
-      return self.master.interact(data,'',dump);
+      try{
+        return self.master.interact(data,'',dump);
+      }
+      catch(e){
+        return report_error(e);
+      }
     }
 
     var paramobj;
@@ -98,8 +103,16 @@ WebServer.prototype.start = function (port) {
       delete data.paramobj;
     }
     console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
-    setTimeout(function(){self.master.interact(data,urlpath,paramobj);},0);
-    report_end(200,'ok');
+    setTimeout(function(){
+      try{
+        self.master.interact(data,urlpath,paramobj);
+        report_end(200,'ok');
+      }
+      catch(e){
+        console.log(e.stack);
+        console.log('GOTCHA',e);
+        report_error(e);
+      }},0);
 	};
 
 	Connect.createServer (
