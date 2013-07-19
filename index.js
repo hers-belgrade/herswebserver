@@ -100,8 +100,10 @@ WebServer.prototype.start = function (port) {
           paramobj = JSON.parse(data.paramobj);
       }
       catch(e){}
-      delete data.paramobj;
-    }
+    }else{
+			paramobj = data.paramobj;
+		}
+		delete data.paramobj;
     console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
     setTimeout(function(){
       try{
