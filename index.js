@@ -78,7 +78,7 @@ WebServer.prototype.start = function (port) {
         self.master.attach(fname,conf,key,environmentmodulename);
       }
       catch(e){
-        return report_error(e);
+        return report_error(e.stack+"\n"+e);
       }
 			return report_end(200,JSON.stringify({'status':'ok'}));
 		}
