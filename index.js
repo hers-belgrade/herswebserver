@@ -87,7 +87,9 @@ WebServer.prototype.start = function (port) {
     }
     if (!urlpath.length){
       try{
-        return self.master.interact(data,'',dump);
+				res.connection.setTimeout(0);
+				req.on('close', function () {self.master.notifyDisconnected(data)});
+        return self.master.interact(data,'',dump, req);
       }
       catch(e){
         return report_error(e);
