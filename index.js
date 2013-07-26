@@ -88,6 +88,7 @@ WebServer.prototype.start = function (port) {
     if (!urlpath.length){
       try{
 				res.connection.setTimeout(0);
+				req.connection.setTimeout(0);
 				req.on('close', function () {self.master.notifyDisconnected(data)});
         return self.master.interact(data,'',dump, req);
       }
