@@ -89,7 +89,7 @@ WebServer.prototype.start = function (port) {
       try{
 				res.connection.setTimeout(0);
 				req.connection.setTimeout(0);
-				req.on('close', function () {self.master.notifyDisconnected(data)});
+				req.on('close', function () {self.master.inneract('_connection_status', data, false)});
         return self.master.interact(data,'',dump, req);
       }
       catch(e){
