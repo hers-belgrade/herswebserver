@@ -61,7 +61,7 @@ WebServer.prototype.start = function (port) {
 		function do_da_request () {
 			if (urlpath === 'init') {
 				if(typeof data.functionality === 'undefined'){
-					return report_error('Missing parameter: ');
+					return report_error('Missing functionality name');
 				}
 				var fname = data.functionality;
 				delete data.functionality;
