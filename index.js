@@ -7,11 +7,10 @@ function WebServer (root) {
 	this.fmap = undefined;
 }
 
-WebServer.prototype.init = function (data) {
+WebServer.prototype.init = function (modulename,config,key,env) {
 	try {
-		var module_name = data.module_name;
 		this.fmap = undefined;
-		this.fmap = this.master.attach(module_name, data.config);
+		this.fmap = this.master.attach(modulename,config,key,env);
 	}catch (e) {
 		console.error(e.stack());
 		return e.toString();
