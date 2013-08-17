@@ -5,18 +5,11 @@ var Path = require('path');
 
 function WebServer (root, pam) {
 	this.root = root;
-	this.fmap = undefined;
 	this.pam = pam;
 }
 
 WebServer.prototype.init = function (modulename,config,key,env) {
-	try {
-		this.fmap = undefined;
-		this.fmap = this.master.attach(modulename,config,key,env);
-	}catch (e) {
-		console.error(e.stack());
-		return e.toString();
-	}
+  return this.master.attach(modulename,config,key,env);
 }
 
 WebServer.prototype.error_log = function (s) {
