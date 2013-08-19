@@ -111,7 +111,7 @@ WebServer.prototype.start = function (port) {
 				paramobj = data.paramobj;
 			}
 			delete data.paramobj;
-			console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
+			console.log('data:',data,'method',urlpath,'paramobj',paramobj);
 			setTimeout(function(){
 				try{
 					self.master.interact(data,urlpath,paramobj);
