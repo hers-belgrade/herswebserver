@@ -114,8 +114,8 @@ WebServer.prototype.start = function (port) {
 			console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
 			setTimeout(function(){
 				try{
-					self.master.interact(data,urlpath,paramobj,handle_function_call);
-					//report_end(200,'ok');
+					var ret = self.master.interact(data,urlpath,paramobj,handle_function_call);
+					report_end(200,('undefined' === typeof(ret)) ? 'ok' : JSON.stringify(ret));
 				}
 				catch(e){
 					console.log(e.stack);
