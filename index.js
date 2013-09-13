@@ -5,19 +5,11 @@ var Path = require('path');
 
 function WebServer (root, pam) {
 	this.root = root;
-	this.fmap = undefined;
 	this.pam = pam;
 }
 
-WebServer.prototype.init = function (data) {
-	try {
-		var module_name = data.module_name;
-		this.fmap = undefined;
-		this.fmap = this.master.attach(module_name, data.config);
-	}catch (e) {
-		console.error(e.stack());
-		return e.toString();
-	}
+WebServer.prototype.init = function (modulename,config,key,env) {
+  return this.master.attach(modulename,config,key,env);
 }
 
 WebServer.prototype.error_log = function (s) {
@@ -35,6 +27,7 @@ WebServer.prototype.start = function (port) {
       if(!res.writable){return;}
 			self.error_log(s);
 			res.writeHead(503,{'Content-Type':'text/plain'});
+      res.write(s);
 			res.end();
 		}
 		function report_end (code, s) {
@@ -45,6 +38,13 @@ WebServer.prototype.start = function (port) {
 			res.write(s);
 			res.end();
 		}
+    function handle_function_call(errcode,errparams,errmess){
+      if(!errcode){
+        report_end(200,'');
+      }else{
+        report_end(200,JSON.stringify({errorcode:errcode,errorparams:errparams,errormessage:errmess}));
+      }
+    };
     function dump(s){
       report_end (200,JSON.stringify(s));
     }
@@ -94,7 +94,7 @@ WebServer.prototype.start = function (port) {
 					res.connection.setTimeout(0);
 					req.connection.setTimeout(0);
 					req.on('close', function () {self.master.inneract('_connection_status', data, false)});
-					return self.master.interact(data,'',dump, req);
+					return self.master.interact(data,'',dump);
 				}
 				catch(e){
 					return report_error(e);
@@ -114,8 +114,8 @@ WebServer.prototype.start = function (port) {
 			console.log('data:',data,'method',urlpath,'paramobj',paramobj);
 			setTimeout(function(){
 				try{
-					self.master.interact(data,urlpath,paramobj);
-					report_end(200,'ok');
+					var ret = self.master.interact(data,urlpath,paramobj,handle_function_call);
+					report_end(200,('undefined' === typeof(ret)) ? 'ok' : JSON.stringify(ret));
 				}
 				catch(e){
 					console.log(e.stack);
