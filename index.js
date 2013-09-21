@@ -20,6 +20,7 @@ WebServer.prototype.start = function (port) {
 	port = port || 80;
 	this.master = new HersData.Hive ();
 	var self = this;
+  this.connectioncount=0;
 
 	var map_resolver = function (req, res, next) {
 		var url = req.url;
@@ -111,7 +112,7 @@ WebServer.prototype.start = function (port) {
 				paramobj = data.paramobj;
 			}
 			delete data.paramobj;
-			console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
+			//console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
 			setTimeout(function(){
 				try{
 					self.master.interact(data,urlpath,paramobj,handle_function_call);
@@ -128,12 +129,21 @@ WebServer.prototype.start = function (port) {
 		self.pam.verify (req, res, urlpath, data, do_da_request);
 	};
 
-	Connect.createServer (
+	var srv = Connect.createServer (
 			Connect.query(),
 			Connect.bodyParser(),
 			map_resolver,
 			Connect.static(Path.resolve(this.root), {maxAge:0})
 	).listen(port);
+  console.log(srv);
+  srv.on('connection',function(connection){
+    self.connectioncount++;
+    console.log('conncount',self.connectioncount);
+    connection.on('close',function(){
+      self.connectioncount--;
+      console.log('conncount',self.connectioncount);
+    });
+  });
 }
 
 module.exports = WebServer;
