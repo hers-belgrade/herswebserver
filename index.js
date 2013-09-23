@@ -9,7 +9,7 @@ function WebServer (root, pam) {
 }
 
 WebServer.prototype.init = function (modulename,config,key,env) {
-  return this.master.attach(modulename,config,key,env);
+  return this.master.data.attach(modulename,config,key,env);
 }
 
 WebServer.prototype.error_log = function (s) {
@@ -30,7 +30,7 @@ WebServer.prototype.start = function (port) {
 			res.writeHead(503,{'Content-Type':'text/plain'});
       res.write(s);
 			res.end();
-		}
+		};
 		function report_end (code, s) {
       if(!res.writable){return;}
 			var header = {'Content-Type':'text/plain'};
@@ -38,17 +38,10 @@ WebServer.prototype.start = function (port) {
 			res.writeHead(code,header);
 			res.write(s);
 			res.end();
-		}
-    function handle_function_call(errcode,errparams,errmess){
-      if(!errcode){
-        report_end(200,'');
-      }else{
-        report_end(200,JSON.stringify({errorcode:errcode,errorparams:errparams,errormessage:errmess}));
-      }
-    };
+		};
     function dump(s){
       report_end (200,JSON.stringify(s));
-    }
+    };
 
     var purl = Url.parse(url,true);
     var urlpath = purl.pathname; //"including the leading slash if present" so we'll remove it if present...
@@ -80,7 +73,7 @@ WebServer.prototype.start = function (port) {
 					delete data.config;
 				}
 				try{
-					self.master.attach(fname,conf,key,environmentmodulename);
+					self.master.data.attach(fname,conf,key,environmentmodulename);
 				}
 				catch(e){
 					return report_error(e.stack+"\n"+e);
@@ -94,10 +87,13 @@ WebServer.prototype.start = function (port) {
 				try{
 					res.connection.setTimeout(0);
 					req.connection.setTimeout(0);
-					req.on('close', function () {self.master.inneract('_connection_status', data, false)});
-					return self.master.interact(data,'',dump);
+					//req.on('close', function () {self.master.inneract('_connection_status', data, false)});
+					req.on('close', function () {self.master.consumers.consumerDown(data)});
+          data.cb = function(s){report_end (200,JSON.stringify(s));};
+					return self.master.consumers.dumpQueue(data);
 				}
 				catch(e){
+          console.log(e,e.stack);
 					return report_error(e);
 				}
 			}
@@ -115,7 +111,19 @@ WebServer.prototype.start = function (port) {
 			//console.log('credentials',data,'method',urlpath,'paramobj',paramobj);
 			setTimeout(function(){
 				try{
-					self.master.interact(data,urlpath,paramobj,handle_function_call);
+          var po = {path:urlpath,params:paramobj};
+          for(var i in data){
+            po[i] = data[i];
+          }
+          var statuscb = function(errcode,errparams,errmess){
+            if(!errcode){
+              report_end(200,'');
+            }else{
+              report_end(200,JSON.stringify({errorcode:errcode,errorparams:errparams,errormessage:errmess}));
+            }
+          };
+          po.statuscb = statuscb;
+					self.master.consumers.invoke(po,statuscb);
 					//report_end(200,('undefined' === typeof(ret)) ? 'ok' : JSON.stringify(ret));
 				}
 				catch(e){
@@ -137,11 +145,9 @@ WebServer.prototype.start = function (port) {
 	).listen(port);
   console.log(srv);
   srv.on('connection',function(connection){
-    self.connectioncount++;
-    console.log('conncount',self.connectioncount);
+    self.master.system.connectionCountChanged({delta:1});
     connection.on('close',function(){
-      self.connectioncount--;
-      console.log('conncount',self.connectioncount);
+      self.master.system.connectionCountChanged({delta:-1});
     });
   });
 }
