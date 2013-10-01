@@ -143,7 +143,7 @@ WebServer.prototype.start = function (port) {
 			map_resolver,
 			Connect.static(Path.resolve(this.root), {maxAge:0})
 	).listen(port);
-  console.log(srv);
+  //console.log(srv);
   srv.on('connection',function(connection){
     self.master.system.connectionCountChanged({delta:1});
     connection.on('close',function(){
