@@ -44,7 +44,7 @@ WebServer.prototype.start = function (port) {
     };
 
     var purl = Url.parse(url,true);
-    var urlpath = purl.pathname; //"including the leading slash if present" so we'll remove it if present...
+    var urlpath = decodeURI(purl.pathname); //"including the leading slash if present" so we'll remove it if present...
     if(urlpath[0]==='/'){urlpath = urlpath.slice(1);}
 
 		if (urlpath.indexOf('.') > -1) { next(); return; }
