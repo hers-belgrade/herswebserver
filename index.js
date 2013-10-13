@@ -117,7 +117,7 @@ WebServer.prototype.start = function (port) {
           }
           var statuscb = function(errcode,errparams,errmess){
             if(!errcode){
-              report_end(200,'');
+              report_end(200,JSON.stringify({errorcode:0}));
             }else{
               report_end(200,JSON.stringify({errorcode:errcode,errorparams:errparams,errormessage:errmess}));
             }
